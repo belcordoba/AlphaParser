@@ -26,7 +26,7 @@ MUL     : '*' ;
 DIV     : '/' ;
 MOD     : '%' ;
 EQEQ    : '==' ;
-NOTEQ   : '<>' ;
+NOTEQ   : '!=' ;
 LESS    : '<' ;
 MORET   : '>' ;
 LESSEQ  : '<=' ;
