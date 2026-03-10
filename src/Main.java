@@ -12,7 +12,7 @@ public class Main {
 
             parser.program();
 
-            // TODO:
+            // TODO: indicar si la compilación fue o no exitosa, y si no, imprimir los errores... para esto usar funciones del parser
             System.out.println("Compilation ended!");
 
             /*Token token;
