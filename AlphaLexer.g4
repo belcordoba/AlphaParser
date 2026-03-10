@@ -35,7 +35,7 @@ MOREEQ  : '>=' ;
 //others
 
 ID      : LETTER (LETTER | DIGIT)* ;
-INTLIT  : DIGIT DIGIT+ ;
+INTLIT  : DIGIT DIGIT* ;
 
 WS      : [ \t\r\n]+ -> skip ;
 
