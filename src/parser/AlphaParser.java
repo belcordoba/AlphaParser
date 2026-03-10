@@ -28,7 +28,7 @@ public class AlphaParser {
         singleCommand();
         while (this.actualToken.getType() == AlphaLexer.SEMI){
             acceptToken(AlphaLexer.SEMI);
-            singleDeclaration();
+            singleCommand();
         }
     }
 
@@ -55,11 +55,19 @@ public class AlphaParser {
             acceptToken(AlphaLexer.ELSE);
             singleCommand();
         } else if (this.actualToken.getType()==AlphaLexer.WHILE) {
-            // TODO: terminar este y el resto de esta regla
+            acceptToken(AlphaLexer.WHILE);
+            expression();
+            acceptToken(AlphaLexer.DO);
+            singleCommand();
         } else if (this.actualToken.getType()==AlphaLexer.LET) {
-
+            acceptToken(AlphaLexer.LET);
+            declaration();
+            acceptToken(AlphaLexer.IN);
+            singleCommand();
         } else if (this.actualToken.getType()==AlphaLexer.BEGIN) {
-
+            acceptToken(AlphaLexer.BEGIN);
+            command();
+            acceptToken(AlphaLexer.END);
         } else {
             System.out.println("Reportar un error con la función a crear");
             // TODO: este error puede llevar varios tokens esperados
@@ -67,7 +75,7 @@ public class AlphaParser {
     }
 
     private void declaration() {
-
+        // TODO: terminar este y el resto de reglas
     }
 
     private void singleDeclaration() {
