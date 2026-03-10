@@ -9,11 +9,17 @@ public class Main {
             AlphaLexer lexer = new  AlphaLexer(input);
 
             AlphaParser parser = new AlphaParser(lexer);
-
             parser.program();
 
-            // TODO: indicar si la compilación fue o no exitosa, y si no, imprimir los errores... para esto usar funciones del parser
-            System.out.println("Compilation ended!");
+            // Los errores contados son los errores encontrados por el parser.
+            if (parser.hasErrors()) {
+                System.out.println("Compilación fallida con " + parser.getErrorCount() + " error(es):");
+                for (String error : parser.getErrors()) {
+                    System.out.println(error);
+                }
+            } else {
+                System.out.println("Compilación exitosa.");
+            }
 
             /*Token token;
             while ((token = lexer.nextToken()).getType() != Token.EOF) {

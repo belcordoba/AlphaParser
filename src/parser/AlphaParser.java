@@ -3,19 +3,23 @@ package parser;
 import generated.AlphaLexer;
 import org.antlr.v4.runtime.Token;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AlphaParser {
     private AlphaLexer theScanner;
     private Token actualToken;
+    private List<String> errors;
 
     public AlphaParser(AlphaLexer theScanner) {
         this.theScanner = theScanner;
         this.actualToken = this.theScanner.nextToken();
+        this.errors = new ArrayList<>();
     }
 
     private void acceptToken(int expectedToken) {
         if (this.actualToken.getType() != expectedToken) {
-            System.out.println("Error significativo con fila y columna");
-            // TODO: para todos los errores, en vez de sout agregarlos a una lista de errores que se usará luego para imrpirimirlos, como un método privado reportError. En otro tipo de errores a veces si se va a hacer un método para reportar el error, ese método espera que venga el expectedToken, y puede suceder que no sea solo un expected, si no múltiples, por lo que va a necesitar una lista de todos los expected para poder crear un string con toda esta lista y poder crear el error.
+            reportError(expectedToken);
         }
         this.actualToken = this.theScanner.nextToken();
     }
@@ -43,8 +47,7 @@ public class AlphaParser {
                 expression();
                 acceptToken(AlphaLexer.RIGHTP);
             } else {
-                System.out.println("Reporte de error como los otros");
-                // TODO: cambiar el reporte de error
+                reportError(AlphaLexer.ASSIGN, AlphaLexer.LEFTP);
             }
         } else if (this.actualToken.getType()==AlphaLexer.IF) {
             acceptToken(AlphaLexer.IF);
@@ -69,32 +72,196 @@ public class AlphaParser {
             command();
             acceptToken(AlphaLexer.END);
         } else {
-            System.out.println("Reportar un error con la función a crear");
-            // TODO: este error puede llevar varios tokens esperados
+            reportError(
+                    AlphaLexer.ID,
+                    AlphaLexer.IF,
+                    AlphaLexer.WHILE,
+                    AlphaLexer.LET,
+                    AlphaLexer.BEGIN
+            );
         }
     }
 
     private void declaration() {
-        // TODO: terminar este y el resto de reglas
+        singleDeclaration();
+        while (this.actualToken.getType() == AlphaLexer.SEMI) {
+            acceptToken(AlphaLexer.SEMI);
+            singleDeclaration();
+        }
     }
 
     private void singleDeclaration() {
-
+        if (this.actualToken.getType()==AlphaLexer.CONST) {
+            acceptToken(AlphaLexer.CONST);
+            acceptToken(AlphaLexer.ID);
+            acceptToken(AlphaLexer.TILDE);
+            expression();
+        } else if (this.actualToken.getType()==AlphaLexer.VAR) {
+            acceptToken(AlphaLexer.VAR);
+            acceptToken(AlphaLexer.ID);
+            acceptToken(AlphaLexer.COLON);
+            typeDenoter();
+        } else {
+            reportError(AlphaLexer.CONST, AlphaLexer.VAR);
+        }
     }
 
     private void typeDenoter() {
-
+        acceptToken(AlphaLexer.ID);
     }
 
     private void expression() {
+        primaryExpression();
+        while (isOperator(this.actualToken.getType())) {
+            operator();
+            primaryExpression();
+        }
+    }
 
+    private boolean isOperator(int tokenType) {
+        return tokenType == AlphaLexer.ADD ||
+                tokenType == AlphaLexer.SUB ||
+                tokenType == AlphaLexer.MUL ||
+                tokenType == AlphaLexer.DIV ||
+                tokenType == AlphaLexer.MOD ||
+                tokenType == AlphaLexer.EQEQ ||
+                tokenType == AlphaLexer.NOTEQ ||
+                tokenType == AlphaLexer.LESS ||
+                tokenType == AlphaLexer.MORET ||
+                tokenType == AlphaLexer.LESSEQ ||
+                tokenType == AlphaLexer.MOREEQ;
     }
 
     private void primaryExpression() {
+        if (this.actualToken.getType() == AlphaLexer.INTLIT) {
+            acceptToken(AlphaLexer.INTLIT);
 
+        } else if (this.actualToken.getType() == AlphaLexer.ID) {
+            acceptToken(AlphaLexer.ID);
+
+        } else if (this.actualToken.getType() == AlphaLexer.LEFTP) {
+            acceptToken(AlphaLexer.LEFTP);
+            expression();
+            acceptToken(AlphaLexer.RIGHTP);
+
+        } else {
+            reportError(AlphaLexer.INTLIT, AlphaLexer.ID, AlphaLexer.LEFTP);
+        }
     }
 
      private void operator() {
+         switch (this.actualToken.getType()) {
+             case AlphaLexer.ADD:
+                 acceptToken(AlphaLexer.ADD);
+                 break;
+             case AlphaLexer.SUB:
+                 acceptToken(AlphaLexer.SUB);
+                 break;
+             case AlphaLexer.MUL:
+                 acceptToken(AlphaLexer.MUL);
+                 break;
+             case AlphaLexer.DIV:
+                 acceptToken(AlphaLexer.DIV);
+                 break;
+             case AlphaLexer.MOD:
+                 acceptToken(AlphaLexer.MOD);
+                 break;
+             case AlphaLexer.EQEQ:
+                 acceptToken(AlphaLexer.EQEQ);
+                 break;
+             case AlphaLexer.NOTEQ:
+                 acceptToken(AlphaLexer.NOTEQ);
+                 break;
+             case AlphaLexer.LESS:
+                 acceptToken(AlphaLexer.LESS);
+                 break;
+             case AlphaLexer.MORET:
+                 acceptToken(AlphaLexer.MORET);
+                 break;
+             case AlphaLexer.LESSEQ:
+                 acceptToken(AlphaLexer.LESSEQ);
+                 break;
+             case AlphaLexer.MOREEQ:
+                 acceptToken(AlphaLexer.MOREEQ);
+                 break;
+             default:
+                 reportError(
+                         AlphaLexer.ADD,
+                         AlphaLexer.SUB,
+                         AlphaLexer.MUL,
+                         AlphaLexer.DIV,
+                         AlphaLexer.MOD,
+                         AlphaLexer.EQEQ,
+                         AlphaLexer.NOTEQ,
+                         AlphaLexer.LESS,
+                         AlphaLexer.MORET,
+                         AlphaLexer.LESSEQ,
+                         AlphaLexer.MOREEQ
+                 );
+         }
+    }
 
+    private void reportError(int expectedToken) {
+        String expected = tokenName(expectedToken);
+        String found = tokenName(this.actualToken.getType());
+        String text = this.actualToken.getText();
+
+        errors.add(
+                "Error en fila " + this.actualToken.getLine() +
+                        ", columna " + this.actualToken.getCharPositionInLine() +
+                        ": se esperaba " + expected +
+                        " pero se encontró \"" + text + "\" (" + found + ")"
+        );
+    }
+
+    private void reportError(int... expectedTokens) {
+        StringBuilder expectedList = new StringBuilder();
+
+        for (int i = 0; i < expectedTokens.length; i++) {
+            expectedList.append(tokenName(expectedTokens[i]));
+            if (i < expectedTokens.length - 1) {
+                expectedList.append(", ");
+            }
+        }
+
+        String found = tokenName(this.actualToken.getType());
+        String text = this.actualToken.getText();
+
+        errors.add(
+                "Error en fila " + this.actualToken.getLine() +
+                        ", columna " + this.actualToken.getCharPositionInLine() +
+                        ": se esperaba uno de [" + expectedList + "]" +
+                        " pero se encontró \"" + text + "\" (" + found + ")"
+        );
+    }
+
+    private String tokenName(int tokenType) {
+        if (tokenType == Token.EOF) {
+            return "EOF";
+        }
+
+        String symbolic = theScanner.getVocabulary().getSymbolicName(tokenType);
+        if (symbolic != null) {
+            return symbolic;
+        }
+
+        String literal = theScanner.getVocabulary().getLiteralName(tokenType);
+        if (literal != null) {
+            return literal;
+        }
+
+        return "TOKEN_DESCONOCIDO";
+    }
+
+    public boolean hasErrors() {
+        return !errors.isEmpty();
+    }
+
+    public List<String> getErrors() {
+        return errors;
+    }
+
+    public int getErrorCount() {
+        return errors.size();
     }
 }

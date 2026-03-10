@@ -1,1 +1,7 @@
-x:=10
+begin
+let const a ~ 5; var x : entero in begin
+x := a + 3;
+if x >= 8 then y := x else y := 0
+end;
+while y != 0 do y := y - 1
+end
